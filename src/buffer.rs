@@ -69,6 +69,9 @@ impl Buffer {
     }
 
     fn flush(&mut self) {
+        if self.items.len() == 0 {
+            return;
+        }
         match self.output.send(&self.items) {
             Ok(_) => self.items.clear(),
             Err(exc) => {
