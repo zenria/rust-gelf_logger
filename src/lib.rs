@@ -83,7 +83,7 @@ extern crate serde_json;
 extern crate serde_value;
 extern crate serde_yaml;
 
-pub use batch::{flush, init, init_from_file, init_processsor, processor, BatchProcessor};
+pub use batch::{flush, init, init_from_file, init_processor, processor, BatchProcessor};
 pub use config::{Config, ConfigBuilder};
 pub use result::Error;
 pub use buffer::Event;

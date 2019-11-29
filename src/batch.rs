@@ -79,7 +79,7 @@ pub fn init_from_file(path: &str) -> Result<()> {
 ///
 pub fn init(cfg: Config) -> Result<()> {
 
-    let processor = init_processsor(&cfg)?;
+    let processor = init_processor(&cfg)?;
 
     let log_level = log::Level::from(cfg.level());
     let logger = GelfLogger::new(log_level);
@@ -94,7 +94,7 @@ pub fn init(cfg: Config) -> Result<()> {
 
 /// Initialize the BatchProcessor.
 ///
-pub fn init_processsor(cfg: &Config) -> Result<BatchProcessor> {
+pub fn init_processor(cfg: &Config) -> Result<BatchProcessor> {
     let (tx, rx): (SyncSender<Event>, Receiver<Event>) = sync_channel(10_000_000);
 
     if let &Some(duration) = cfg.buffer_duration() {
