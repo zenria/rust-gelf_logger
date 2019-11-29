@@ -31,7 +31,6 @@ impl Metronome {
     }
 }
 
-#[derive(Debug)]
 pub struct Buffer {
     items: Vec<GelfRecord>,
     arx: Receiver<Event>,

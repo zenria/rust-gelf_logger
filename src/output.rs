@@ -12,7 +12,6 @@ use crate::config::Config;
 use crate::formatter::GelfFormatter;
 use crate::result::Result;
 
-#[derive(Debug)]
 pub struct GelfTcpOutput {
     hostname: String,
     port: u64,
