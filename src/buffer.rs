@@ -36,36 +36,51 @@ pub struct Buffer {
     arx: Receiver<Event>,
     errors: Vec<Error>,
     output: GelfTcpOutput,
+    buffer_size: Option<usize>,
 }
 
 impl Buffer {
-    pub fn new(arx: Receiver<Event>, output: GelfTcpOutput) -> Buffer {
-        Buffer { items: Vec::new(), arx, errors: Vec::new(), output }
+    pub fn new(arx: Receiver<Event>, output: GelfTcpOutput, buffer_size: Option<usize>) -> Buffer {
+        Buffer {
+            items: Vec::new(),
+            arx,
+            errors: Vec::new(),
+            output,
+            buffer_size,
+        }
     }
     pub fn run(&mut self) {
         loop {
             match { self.arx.recv() } {
-                Ok(event) => {
-                    match event {
-                        Event::Send => match self.output.send(&self.items) {
-                            Ok(_) => self.items.clear(),
-                            Err(exc) => {
-                                self.errors.push(exc);
-                                if self.errors.len() >= 5 {
-                                    eprintln!("Many errors occurred while sending GELF logs event!");
-                                    for err in self.errors.iter() {
-                                        eprintln!(">> {:?}", err);
-                                    }
-                                    self.errors.clear();
-                                }
-                                thread::sleep(Duration::from_millis(100));
+                Ok(event) => match event {
+                    Event::Send => self.flush(),
+                    Event::Data(record) => {
+                        self.items.push(record);
+                        if let Some(max_buffer_size) = self.buffer_size {
+                            if self.items.len() >= max_buffer_size {
+                                self.flush();
                             }
-                        },
-                        Event::Data(record) => self.items.push(record),
+                        }
                     }
-                }
+                },
                 Err(_) => return,
             };
+        }
+    }
+
+    fn flush(&mut self) {
+        match self.output.send(&self.items) {
+            Ok(_) => self.items.clear(),
+            Err(exc) => {
+                self.errors.push(exc);
+                if self.errors.len() >= 5 {
+                    eprintln!("Many errors occurred while sending GELF logs event!");
+                    for err in self.errors.iter() {
+                        eprintln!(">> {:?}", err);
+                    }
+                    self.errors.clear();
+                }
+            }
         }
     }
 }

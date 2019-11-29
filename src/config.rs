@@ -195,19 +195,19 @@ impl Config {
     /// will be ignored.
     pub fn level(&self) -> &GelfLevel { &self.level }
     /// The name of the remote server.
-    pub fn hostname(&self) -> &String { &self.hostname }
+    pub fn hostname(&self) -> &str { &self.hostname }
     /// The port of the remote host.
     pub fn port(&self) -> &u64 { &self.port }
     /// Adds a NUL byte (`\0`) after each entry.
-    pub fn null_character(&self) -> &bool { &self.null_character }
+    pub fn null_character(&self) -> bool { self.null_character }
     /// Activate transport security.
-    pub fn use_tls(&self) -> &bool { &self.use_tls }
+    pub fn use_tls(&self) -> bool { self.use_tls }
     /// Get the upperbound limit on the number of records that can be placed in the buffer, once
     /// this size has been reached, the buffer will be sent to the remote server.
-    pub fn buffer_size(&self) -> &Option<usize> { &self.buffer_size }
+    pub fn buffer_size(&self) -> Option<usize> { self.buffer_size }
     /// Get the maximum lifetime (in milli seconds) of the buffer before send it to the remote
     /// server.
-    pub fn buffer_duration(&self) -> &Option<u64> { &self.buffer_duration }
+    pub fn buffer_duration(&self) -> Option<u64> { self.buffer_duration }
     /// Every additional data which will be append to each log entry.
     pub fn additional_fields(&self) -> &BTreeMap<serde_value::Value, serde_value::Value> { &self.additional_fields }
     /// Returns a new builder.

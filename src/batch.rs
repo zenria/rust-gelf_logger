@@ -97,7 +97,7 @@ pub fn init(cfg: Config) -> Result<()> {
 pub fn init_processor(cfg: &Config) -> Result<BatchProcessor> {
     let (tx, rx): (SyncSender<Event>, Receiver<Event>) = sync_channel(10_000_000);
 
-    if let &Some(duration) = cfg.buffer_duration() {
+    if let Some(duration) = cfg.buffer_duration() {
         let ctx = tx.clone();
         Metronome::start(duration, ctx);
     }
@@ -106,7 +106,7 @@ pub fn init_processor(cfg: &Config) -> Result<BatchProcessor> {
 
     thread::spawn(move || {
         let gelf_tcp_output = GelfTcpOutput::from(&config);
-        let _ = Buffer::new(rx,gelf_tcp_output ).run();
+        let _ = Buffer::new(rx,gelf_tcp_output, config.buffer_size()).run();
     });
 
     let gelf_level = cfg.level().clone();

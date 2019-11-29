@@ -59,6 +59,6 @@ impl GelfTcpOutput {
 
 impl From<&Config> for GelfTcpOutput {
     fn from(cfg: &Config) -> GelfTcpOutput {
-        GelfTcpOutput::new(cfg.hostname().clone(), cfg.port().clone(), GelfFormatter::from(cfg), cfg.use_tls().clone())
+        GelfTcpOutput::new(cfg.hostname().into(), cfg.port().clone(), GelfFormatter::from(cfg), cfg.use_tls().clone())
     }
 }
