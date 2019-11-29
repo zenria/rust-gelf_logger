@@ -153,14 +153,18 @@ impl Batch for NoProcessor {
     fn flush(&self) -> Result<()> { Ok(()) }
 }
 
-
+/// The Batch Processor.
+///
+/// This is the central struct of this crate. It sends GelfRecord to the configured
+/// gelf sink.
+///
 pub struct BatchProcessor {
     tx: SyncSender<Event>,
     level: GelfLevel,
 }
 
 impl BatchProcessor {
-    pub fn new(tx: SyncSender<Event>, level: GelfLevel) -> BatchProcessor {
+    pub(crate) fn new(tx: SyncSender<Event>, level: GelfLevel) -> BatchProcessor {
         BatchProcessor { tx, level }
     }
 }
