@@ -102,10 +102,10 @@ pub fn init_processor(cfg: &Config) -> Result<BatchProcessor> {
         Metronome::start(duration, ctx);
     }
 
-    let gelf_tcp_output = GelfTcpOutput::from(cfg);
+    let config = cfg.clone();
 
     thread::spawn(move || {
-        println!("Starting GELF processor!");
+        let gelf_tcp_output = GelfTcpOutput::from(&config);
         let _ = Buffer::new(rx,gelf_tcp_output ).run();
     });
 

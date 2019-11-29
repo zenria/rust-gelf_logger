@@ -17,36 +17,41 @@ pub struct GelfTcpOutput {
     port: u64,
     formatter: GelfFormatter,
     use_tls: bool,
+    stream: Option<Box<dyn Write>>
 }
 
 impl GelfTcpOutput {
     pub fn new(hostname: String, port: u64, formatter: GelfFormatter, use_tls: bool) -> GelfTcpOutput {
-        GelfTcpOutput { hostname, port, formatter, use_tls }
+        GelfTcpOutput { hostname, port, formatter, use_tls, stream: None }
     }
-    pub fn send(&self, data: &Vec<GelfRecord>) -> Result<()> {
-        let address = format!("{}:{}", &self.hostname, &self.port);
-        match self.use_tls {
-            false => {
-                println!("Connecting to {}", address);
-                let mut stream = TcpStream::connect(address)?;
-                for rec in data.iter() {
-                    if let Ok(jdata) = self.formatter.format(rec) {
-                        println!("Sending to {}", jdata);
-                        stream.write(jdata.as_bytes())?;
-                    }
-                }
+    pub fn send(&mut self, data: &Vec<GelfRecord>) -> Result<()> {
+        for rec in data.iter() {
+            if let Ok(jdata) = self.formatter.format(rec) {
+                self.write_stream(&jdata.as_bytes())?;
             }
-            true => {
-                let connector = TlsConnector::new().unwrap();
-                let stream = TcpStream::connect(address)?;
-                let mut stream = connector.connect(&self.hostname, stream)?;
+        }
+        Ok(())
+    }
 
-                for rec in data.iter() {
-                    if let Ok(jdata) = self.formatter.format(rec) {
-                        stream.write(jdata.as_bytes())?;
-                    }
+    fn write_stream(&mut self, bytes: &[u8]) -> Result<()> {
+        if self.stream.is_none() {
+            let address = format!("{}:{}", &self.hostname, &self.port);
+            self.stream = Some(match self.use_tls {
+                false => {
+                    Box::new(TcpStream::connect(address)?)
+
                 }
-            }
+                true => {
+                    let connector = TlsConnector::new().unwrap();
+                    let stream = TcpStream::connect(address)?;
+                    Box::new(connector.connect(&self.hostname, stream)?)
+                }
+            })
+        }
+        if let Err(e) = self.stream.as_mut().unwrap().write(bytes){
+            // an error occured on the stream, reconnect it next time
+            self.stream = None;
+            Err(e)?;
         }
         Ok(())
     }
