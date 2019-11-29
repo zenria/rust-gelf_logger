@@ -140,8 +140,11 @@ pub fn flush() -> Result<()> {
     processor().flush()
 }
 
+/// Send gelf record with some buffering
 pub trait Batch {
+    /// Send a GelfRecord, the record might be buffered before being actually sent
     fn send(&self, rec: &GelfRecord) -> Result<()>;
+    /// Actually send buffered records.
     fn flush(&self) -> Result<()>;
 }
 
