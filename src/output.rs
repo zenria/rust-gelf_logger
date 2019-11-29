@@ -12,7 +12,7 @@ use crate::config::Config;
 use crate::formatter::GelfFormatter;
 use crate::result::Result;
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct GelfTcpOutput {
     hostname: String,
     port: u64,
@@ -28,9 +28,11 @@ impl GelfTcpOutput {
         let address = format!("{}:{}", &self.hostname, &self.port);
         match self.use_tls {
             false => {
+                println!("Connecting to {}", address);
                 let mut stream = TcpStream::connect(address)?;
                 for rec in data.iter() {
                     if let Ok(jdata) = self.formatter.format(rec) {
+                        println!("Sending to {}", jdata);
                         stream.write(jdata.as_bytes())?;
                     }
                 }

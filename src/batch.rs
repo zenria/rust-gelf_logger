@@ -105,6 +105,7 @@ pub fn init_processor(cfg: &Config) -> Result<BatchProcessor> {
     let gelf_tcp_output = GelfTcpOutput::from(cfg);
 
     thread::spawn(move || {
+        println!("Starting GELF processor!");
         let _ = Buffer::new(rx,gelf_tcp_output ).run();
     });
 
